@@ -90,7 +90,7 @@ export default {
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: 'Almefy on Nuxt.js',
+      title: 'Sample on nuxt.js',
     }
   },
   methods: {

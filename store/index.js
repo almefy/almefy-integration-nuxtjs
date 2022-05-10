@@ -32,26 +32,27 @@ export const actions = {
       }
       const jwtCookie = req.headers.cookie
         .split(";")
-        .find(c => c.trim().startsWith("jwt="));
+        .find(c => c.trim().startsWith(process.env.ACCESS_TOKEN));
       if (!jwtCookie) {
         return;
       }
 
       token = jwtCookie.split("=")[1];
     } else if (process.client) {
-      token = localStorage.getItem("token");
+
+      token = localStorage.getItem(process.env.ACCESS_TOKEN);
+
     }
+
     vuexContext.commit("setToken", token);
   },
-  logout(vuexContext) {
+  logout(vuexContext, context) {
 
     vuexContext.commit("clearToken");
-
-    Cookie.remove("jwt");
-    Cookie.remove("expirationDate");
+    Cookie.remove(context.$config.accessToken);
 
     if (process.client) {
-      localStorage.removeItem("token");
+      localStorage.removeItem(context.$config.accessToken);
     }
 
   }

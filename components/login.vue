@@ -8,7 +8,7 @@
           <v-card elevation="24">
             <v-row no-gutters>
               <v-col cols="12" md="8" class="black--text">
-                <v-card-title class="text-h3"><AlmefyLogo/></v-card-title>
+                <v-card-title class="text-h3"><Logo/></v-card-title>
                 <v-card-subtitle class="text-h6">Sample Login on nuxt.js</v-card-subtitle>
                 <v-card-text><small>Version 1.0</small></v-card-text>
               </v-col>
@@ -63,10 +63,10 @@
           } else if (response.status===200)  {
             this.$axios.get(this.challenge.authTokenUrl).then(response => {
               this.$axios.get(`${this.$config.authControllerUrl}`, {
-                headers: { 'X-Almify-Auth': response.data.token }
+                headers: { 'X-Sample-Auth': response.data.token }
               }).then(response => {
                   if (response.status===200) {
-                    console.log('finally');
+                    console.log('Got the roundtrip completly, got own JWT token based on secret with identity via Roundtrip.');
                     this.$router.push(this.$config.homeRoute);
                   }
               })

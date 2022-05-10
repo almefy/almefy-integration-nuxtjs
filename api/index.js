@@ -6,7 +6,6 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const CryptoJS = require("crypto-js");
-// const helper = require("./helper");
 
 router.use((req, res, next) => {
   Object.setPrototypeOf(req, app.request)
@@ -14,7 +13,7 @@ router.use((req, res, next) => {
   req.res = res
   res.req = req
   next()
-})
+});
 
 router.get(`/login-controller/v1`, (req, res) => {
 
@@ -60,7 +59,6 @@ router.get(`/login-controller/v1`, (req, res) => {
           if (result.status===200) {
 
             const secretKeyBase64 = Buffer.from(process.env.ACCESS_SECRETBASE64, "base64");
-            // const signTime = Math.floor(new Date().getTime() / 1000);
 
             const accessPayload = {
               sub: tokenresult.sub,
@@ -69,14 +67,12 @@ router.get(`/login-controller/v1`, (req, res) => {
             const signOptions = {
               expiresIn: '86400000',
               algorithm: 'HS256',
-          }
-
+            }
             const accessToken = jwt.sign(accessPayload, secretKeyBase64, signOptions);
 
             console.log("[API] challenge successfully completed", accessToken);
-            res.cookie("jwt", accessToken);
+            res.cookie(process.env.ACCESS_TOKEN, accessToken);
             res.json({status: 200, "message" : "OTP correct - access token set as cookie jwt"});
-
 
           } else {
 
@@ -90,6 +86,7 @@ router.get(`/login-controller/v1`, (req, res) => {
           console.log("[API] There was an error",  (error.response)?error.response:error);
 
         }
+
       }
 
       run();
@@ -97,11 +94,16 @@ router.get(`/login-controller/v1`, (req, res) => {
     }
   }
   catch (error) {
+
     console.log(error);
+
   }
+
 });
 
 module.exports = {
+
   path: '/api',
   handler: router
+
 }

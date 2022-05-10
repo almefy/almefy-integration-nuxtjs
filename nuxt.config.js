@@ -6,8 +6,8 @@ import  bodyParser from 'body-parser';
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - Almefy Weblogin on NUXT.js',
-    title: 'Almefy Weblogin on NUXT.js',
+    titleTemplate: '%s - Weblogin on nuxt.js',
+    title: 'Weblogin on nuxt.js',
     htmlAttrs: {
       lang: 'en'
     },
