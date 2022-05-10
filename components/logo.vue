@@ -1,5 +1,5 @@
 <template>
-  <img class="logo" alt="Logo" src="/logo.svg" />
+  <img class="logo" alt="Logo" src="/logo-insta.svg" />
 </template>
 
 <style>
