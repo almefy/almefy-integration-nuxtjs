@@ -55,8 +55,10 @@ export default {
     homeRoute: process.env.HOME_ROUTE,
     apiHost: process.env.ALMEFY_APIHOST,
     accessKey: process.env.ALMEFY_KEY,
+    enrollmentUrl: process.env.ENROLLMENT_URL,
     authControllerUrl: process.env.CONTROLLER_URL,
     authToken: process.env.CONTROLLER_AUTH_TOKEN,
+    mailGlobalMailLocale: process.env.ALMEFY_GLOBAL_MAIL_LOCALE
   },
   privateRuntimeConfig: {
     secretBase64: process.env.ALMEFY_SECRETBASE64,

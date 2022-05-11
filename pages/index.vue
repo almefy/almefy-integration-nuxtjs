@@ -10,7 +10,10 @@
         </v-card-title>
         <v-card-text>
           <p>
-            If you see this page, everything works. Happy coding!
+            If you see this page, everything works (JWT sample_access_token is set).
+          </p>
+          <p>
+            Happy coding!
           </p>
         </v-card-text>
       </v-card>

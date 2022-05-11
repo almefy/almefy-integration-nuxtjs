@@ -18,6 +18,25 @@ router.use((req, res, next) => {
   next()
 });
 
+function createSignedToken(methodName,url,bodyJson) {
+  const mytime = Math.floor(new Date().getTime() / 1000);
+  const claim = {
+    "iss": process.env.ALMEFY_KEY,
+    "aud": process.env.ALMEFY_APIHOST,
+    "iat": mytime,
+    "nbf": mytime+10,
+    "exp": mytime+10,
+    "method": methodName,
+    "url": process.env.ALMEFY_APIHOST + url,
+    "bodyHash": CryptoJS.SHA256(bodyJson).toString()
+  };
+
+  const secretKeyBase64 = Buffer.from(process.env.ALMEFY_SECRETBASE64, "base64");
+  const signedToken = jwt.sign(claim, secretKeyBase64);
+  return signedToken;
+
+}
+
 const validation = [
   oneOf([
       check('email')
@@ -25,40 +44,70 @@ const validation = [
         .withMessage('email is required')
         .isLength({ min: 3 })
         .withMessage('email to short'),
-
       check('email')
         .exists()
         .withMessage('email is required')
         .isEmail()
         .withMessage('email has wrong format'),
-  ]),
-  check('password')
-      .exists()
-      .withMessage('password is required')
+  ])
 ];
 
 function handleValidationErrors(req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log(util.inspect(errors.array()));
-    return res.status(422).json({ errors: errors.array() });
+    console.log(errors);
+    return res.status(400).json({ errors: errors.array() });
   }
   next();
 };
 
-router.post(`/enrollment/v1`,  validation, handleValidationErrors, (req, res) => {
+router.post(`/user-controller/enroll`,  validation, handleValidationErrors, (req, res) => {
   try {
-    //
-    const isEmail = validator.isEmail(req.body.email);
 
-    res.status(200).json({ isEmail });
+      const email = req.body.email;
+      const sendEnrollment = true;
+
+      const bodyJson = JSON.stringify({
+        "sendEmail": sendEnrollment,
+        "identifier":`${email}`,
+        "sendEmailTo":`${email}`,
+        "sendEmailLocale":`${process.env.ALMEFY_GLOBAL_MAIL_LOCALE}`
+      });
+      const url = `${process.env.ALMEFY_APIHOST}/v1/entity/identities/enroll`;
+      const signedToken = createSignedToken("POST",url, bodyJson)
+
+      async function run() {
+        try {
+
+          const response = await axios.post(url, bodyJson, {
+            headers: {
+              "Authorization": `Bearer ${signedToken}`,
+              "Content-Type": "application/json; charset=utf-8",
+            }
+          });
+
+          if (response.status===200 || response.status===201) {
+            res.status(200).json({message: `Please check your mailbox ${email} and use the instalogin-app for testing 2-Factor Authentication (2FA) in One Step. Without password!`});
+          } else {
+            console.log("[API] encrollemnt error", response)
+            res.status(400).json({error: "Api returned an error! Error is logged in console"});
+          }
+        } catch (error) {
+          res.status(400).json({error});
+          console.log("[API] enrollment error",  (error.response)?error.response:error);
+
+        }
+      }
+      run();
+
   }
   catch (error) {
     console.log(error);
+    res.status(400).json({error});
   }
 });
 
-router.get(`/login-controller/v1`, (req, res) => {
+router.get(`/login-controller`, (req, res) => {
 
   try {
 
