@@ -1,6 +1,9 @@
 require('dotenv').config();
 
+const util = require('util');
 const express = require("express");
+const { validator } = require('express-validator');
+const { check, oneOf, validationResult } = require('express-validator/check');
 const router = express.Router();
 const app = express();
 const jwt = require("jsonwebtoken");
@@ -13,6 +16,46 @@ router.use((req, res, next) => {
   req.res = res
   res.req = req
   next()
+});
+
+const validation = [
+  oneOf([
+      check('email')
+        .exists()
+        .withMessage('email is required')
+        .isLength({ min: 3 })
+        .withMessage('email to short'),
+
+      check('email')
+        .exists()
+        .withMessage('email is required')
+        .isEmail()
+        .withMessage('email has wrong format'),
+  ]),
+  check('password')
+      .exists()
+      .withMessage('password is required')
+];
+
+function handleValidationErrors(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(util.inspect(errors.array()));
+    return res.status(422).json({ errors: errors.array() });
+  }
+  next();
+};
+
+router.post(`/enrollment/v1`,  validation, handleValidationErrors, (req, res) => {
+  try {
+    //
+    const isEmail = validator.isEmail(req.body.email);
+
+    res.status(200).json({ isEmail });
+  }
+  catch (error) {
+    console.log(error);
+  }
 });
 
 router.get(`/login-controller/v1`, (req, res) => {

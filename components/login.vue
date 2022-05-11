@@ -3,7 +3,7 @@
   <v-app dark>
 
     <v-container fluid class="fill-height">
-      <v-row align="center" justify="center">
+      <v-row v-show="showLogin" justify="center">
         <v-col cols="12" sm="6" md="6">
           <v-card elevation="24">
             <v-row no-gutters>
@@ -24,6 +24,23 @@
           </v-card>
         </v-col>
       </v-row>
+      <v-row align="center" justify="center">
+        <v-col cols="12" sm="6" md="6">
+          <v-card elevation="24">
+            <v-row no-gutters>
+              <v-col cols="12" md="8" class="black--text">
+                <v-card-title class="text-h3"><Logo/></v-card-title>
+                <v-card-subtitle class="text-h6">Register a user</v-card-subtitle>
+                <v-card-text><small></small></v-card-text>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-container style="text-align:center; vertical-align:middle">
+                </v-container>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-col>
+      </v-row>
     </v-container>
   </v-app>
 
@@ -34,6 +51,7 @@
   export default {
     layout: 'default',
     data: () => ({
+      showLogin: true,
       hideAll: false,
       challenge: {
         id: null,

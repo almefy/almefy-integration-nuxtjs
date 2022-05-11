@@ -1,6 +1,6 @@
 export default function(context) {
-  console.log("[Middleware] auth.js");
 
+  console.log("[Middleware] auth.js");
 
   if (context.store.getters.isAuthenticated && context.route.path === process.env.LOGIN_ROUTE) {
     context.redirect(process.env.HOME_ROUTE);
