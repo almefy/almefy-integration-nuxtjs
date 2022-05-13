@@ -136,7 +136,6 @@
         const data = {"email": this.email};
         const me = this;
         this.$axios.post(`${this.$config.enrollmentUrl}`, data).then((response) => {
-          console.log('herwe')
           if (response.status===200) {
             me.text = response.data.message;
             me.enrollmentHint=true;
@@ -155,15 +154,13 @@
           if (response.status===204 && this.showLogin) {
             this.checkChallenge(challengeId);
           } else if (response.status===200)  {
-            this.$axios.get(this.challenge.authTokenUrl).then(response => {
-              this.$axios.get(`${this.$config.authControllerUrl}`, {
-                headers: { 'X-Sample-Auth': response.data.token }
-              }).then(response => {
-                  if (response.status===200) {
-                    console.log('Got the roundtrip completly, create own JWT token based on secret with identity');
-                    this.$router.push(this.$config.homeRoute);
-                  }
-              })
+            this.$axios.get(`${this.$config.authControllerUrl}`, {
+              headers: { 'X-Almefy-Auth': response.data.token }
+            }).then(response => {
+              if (response.status===200) {
+                console.log('Got the roundtrip completly, create own JWT token based on secret with identity');
+                this.$router.push(this.$config.homeRoute);
+              }
             })
           } else {
             // this should die cause of....
