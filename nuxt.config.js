@@ -45,7 +45,7 @@ export default {
   target: 'server', // default is 'server'
   serverMiddleware: [bodyParser.json(), "~/api"],
   server: {
-    port: 3033,
+    port: 3001,
   },
   publicRuntimeConfig: {
     env: process.env.NODE_ENV,
