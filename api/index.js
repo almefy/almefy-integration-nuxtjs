@@ -121,9 +121,7 @@ router.get(`/login-controller`, (req, res) => {
       console.log("[API] JWT Challenge response verifyed - sending OTP", tokenresult);
 
       const sendUrl = `${tokenresult.iss}/v1/entity/identities/${encodeURIComponent(tokenresult.sub)}/authenticate`;
-
       const processAuthentificationData = JSON.stringify({ "challenge": tokenresult.jti, "otp": tokenresult.otp });
-
       const mytime = Math.floor(new Date().getTime() / 1000);
       const bearerPayload = {
         iss: process.env.ALMEFY_KEY,
@@ -135,7 +133,6 @@ router.get(`/login-controller`, (req, res) => {
         url: sendUrl,
         bodyHash: CryptoJS.SHA256(processAuthentificationData).toString()
       };
-
       const signedToken = jwt.sign(bearerPayload, secretKeyBase64);
 
       async function run() {
@@ -163,6 +160,7 @@ router.get(`/login-controller`, (req, res) => {
             const accessToken = jwt.sign(accessPayload, secretKeyBase64, signOptions);
 
             console.log("[API] challenge successfully completed", accessToken);
+            console.log(process.env.ACCESS_TOKEN)
             res.cookie(process.env.ACCESS_TOKEN, accessToken);
             res.json({status: 200, "message" : "OTP correct - access token set as cookie jwt"});
 
