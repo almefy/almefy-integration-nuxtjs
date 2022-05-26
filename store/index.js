@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import Cookie from "js-cookie";
+
 import jwt from 'jsonwebtoken';
 
 Vue.use(Vuex)
@@ -67,8 +67,9 @@ export const actions = {
   },
   logout(vuexContext, context) {
 
+    console.log(context.$config.accessToken, 'we are here');
     vuexContext.commit("clearToken");
-    Cookie.remove(context.$config.accessToken);
+    context.$cookies.remove(context.$config.accessToken);
 
     if (process.client) {
       localStorage.removeItem(context.$config.accessToken);

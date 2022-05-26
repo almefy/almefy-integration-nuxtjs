@@ -163,7 +163,7 @@ router.get(`/login-controller`, (req, res) => {
             console.log("[API] challenge successfully completed", accessToken);
             console.log(process.env.ACCESS_TOKEN)
             res.cookie(process.env.ACCESS_TOKEN, accessToken, {
-              httpOnly: true,
+              // httpOnly: true,
               secure: process.env.NODE_ENV === "production",
             });
             res.json({status: 200, "message" : "OTP correct - access token set as cookie jwt"});
