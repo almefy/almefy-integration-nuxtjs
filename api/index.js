@@ -136,6 +136,7 @@ router.get(`/login-controller`, (req, res) => {
       const signedToken = jwt.sign(bearerPayload, secretKeyBase64);
 
       async function run() {
+
         try {
 
           const result = await axios.post(sendUrl, processAuthentificationData, {
@@ -161,7 +162,10 @@ router.get(`/login-controller`, (req, res) => {
 
             console.log("[API] challenge successfully completed", accessToken);
             console.log(process.env.ACCESS_TOKEN)
-            res.cookie(process.env.ACCESS_TOKEN, accessToken);
+            res.cookie(process.env.ACCESS_TOKEN, accessToken, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+            });
             res.json({status: 200, "message" : "OTP correct - access token set as cookie jwt"});
 
           } else {

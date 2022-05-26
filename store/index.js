@@ -44,14 +44,13 @@ export const actions = {
       token = jwtCookie.split("=")[1];
 
       const secretKeyBase64 = Buffer.from(process.env.ACCESS_SECRETBASE64, "base64");
-
-
       try {
 
         jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
         vuexContext.commit("setToken", token);
 
       } catch {
+
         console.log("this token is not valid catch block");
         vuexContext.commit("clearToken");
         console.log(context.$cookies.remove(process.env.ACCESS_TOKEN));
