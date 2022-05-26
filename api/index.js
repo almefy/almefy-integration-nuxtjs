@@ -161,7 +161,7 @@ router.get(`/login-controller`, (req, res) => {
 
             console.log("[API] challenge successfully completed", accessToken);
             console.log(process.env.ACCESS_TOKEN)
-            res.cookie(process.env.ACCESS_TOKEN, accessToken, {httpOnly: true, secure: false, path: '/',  domain: '.almefy.com'});
+            res.cookie(process.env.ACCESS_TOKEN, accessToken);
             res.json({status: 200, "message" : "OTP correct - access token set as cookie jwt"});
 
           } else {
