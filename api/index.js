@@ -1,8 +1,6 @@
 require('dotenv').config();
 
-const util = require('util');
 const express = require("express");
-const { validator } = require('express-validator');
 const { check, oneOf, validationResult } = require('express-validator/check');
 const router = express.Router();
 const app = express();
@@ -118,6 +116,7 @@ router.get(`/login-controller`, (req, res) => {
       const secretKeyBase64 = Buffer.from(process.env.ALMEFY_SECRETBASE64, "base64");
       const tokenresult = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
 
+      console.log("[API] JWT Token from API", token);
       console.log("[API] JWT Challenge response verifyed - sending OTP", tokenresult);
 
       const sendUrl = `${tokenresult.iss}/v1/entity/identities/${encodeURIComponent(tokenresult.sub)}/authenticate`;
