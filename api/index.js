@@ -165,7 +165,7 @@ router.get(`/login-controller`, (req, res) => {
               // httpOnly: true,
               secure: process.env.NODE_ENV === "production",
             });
-            res.json({status: 200, "message" : "OTP correct - access token set as cookie jwt"});
+            res.json({status: 200, "message" : "otp works - created access token and set as jwt cookie"});
 
           } else {
 
