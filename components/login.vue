@@ -118,7 +118,7 @@
       this.startChallenge();
     },
     methods: {
-      startChallenge(){
+      startChallenge() {
         const data = {"key": this.$config.accessKey}
         this.$axios.$post(`${this.$config.apiHost}/v1/entity/challenges`, data).then((response) => {
           this.challenge = response;

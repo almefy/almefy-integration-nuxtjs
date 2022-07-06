@@ -133,7 +133,7 @@ router.get(`/login-controller`, (req, res) => {
         bodyHash: CryptoJS.SHA256(processAuthentificationData).toString()
       };
       const signedToken = jwt.sign(bearerPayload, secretKeyBase64);
-
+      console.log("signedToken", signedToken)
       async function run() {
 
         try {
