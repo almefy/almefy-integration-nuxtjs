@@ -141,8 +141,7 @@
             me.enrollmentHint=true;
             me.email="";
             me.showLogin=true;
-          }
-          else {
+          } else {
             me.enrollmentHint=true;
             me.text = response.error;
           }

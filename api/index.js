@@ -16,14 +16,16 @@ router.use((req, res, next) => {
   next()
 });
 
+
+// FIXME check shorthand iat
 function createSignedToken(methodName,url,bodyJson) {
-  const mytime = Math.floor(new Date().getTime() / 1000);
+  const iat = Math.floor(new Date().getTime() / 1000);
   const claim = {
     "iss": process.env.ALMEFY_KEY,
     "aud": process.env.ALMEFY_APIHOST,
-    "iat": mytime,
-    "nbf": mytime+10,
-    "exp": mytime+10,
+    iat,
+    "nbf": iat+10,
+    "exp": iat+10,
     "method": methodName,
     "url": process.env.ALMEFY_APIHOST + url,
     "bodyHash": CryptoJS.SHA256(bodyJson).toString()
