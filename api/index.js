@@ -18,7 +18,7 @@ router.use((req, res, next) => {
 
 
 // FIXME check shorthand iat
-function createSignedToken(methodName,url,bodyJson) {
+function createSignedToken(methodName,urlresult,bodyJson) {
   const iat = Math.floor(new Date().getTime() / 1000);
   const claim = {
     "iss": process.env.ALMEFY_KEY,
@@ -27,7 +27,7 @@ function createSignedToken(methodName,url,bodyJson) {
     "nbf": iat+10,
     "exp": iat+10,
     "method": methodName,
-    "url": process.env.ALMEFY_APIHOST + url,
+    "url": urlresult,
     "bodyHash": CryptoJS.SHA256(bodyJson).toString()
   };
 
@@ -89,12 +89,12 @@ router.post(`/user-controller/enroll`,  validation, handleValidationErrors, (req
           if (response.status===200 || response.status===201) {
             res.status(200).json({message: `Please check your mailbox ${email} and use the Almefy-APP for testing 2-Factor Authentication (2FA) in One Step. Without password!`});
           } else {
-            console.log("[API] encrollemnt error", response)
+            console.log("[API] encrollemnt error 1", response)
             res.status(400).json({error: "Api returned an error! Error is logged in console"});
           }
         } catch (error) {
           res.status(400).json({error});
-          console.log("[API] enrollment error",  (error.response)?error.response:error);
+          console.log("[API] enrollment error 2",  (error.response)?error.response:error);
 
         }
       }
