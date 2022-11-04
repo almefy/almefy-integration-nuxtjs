@@ -11,7 +11,7 @@
                 <v-card-title class="text-h3"><Logo/></v-card-title>
                 <v-card-subtitle class="text-h6">Sample Login on nuxt.js</v-card-subtitle>
                 <v-card-text><small>Version 1.0a</small>
-                <v-card-text><v-btn @click="showLogin = !showLogin">Enroll new user here</v-btn></v-card-text>
+                <v-card-text><v-btn v-show="publicEnrollment" @click="showLogin = !showLogin">Enroll new user here</v-btn></v-card-text>
                 </v-card-text>
 
               </v-col>
@@ -102,7 +102,8 @@
         pollingUrl: null,
         socketsUrl: null,
         expiresAt: null
-      }
+      },
+      publicEnrollment: false,
     }),
     watch: {
       showLogin(newval, oldval) {
@@ -115,6 +116,7 @@
       }
     },
     mounted() {
+      this.publicEnrollment = this.$config.publicEnrollment;
       this.startChallenge();
     },
     methods: {

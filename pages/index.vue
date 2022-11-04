@@ -10,10 +10,7 @@
         </v-card-title>
         <v-card-text>
           <p>
-            If you see this page, everything works (JWT almefy_access_token is set).
-          </p>
-          <p>
-            Happy coding!
+            If you see this page, everything works (JWT almefy_access_token is set and verified).
           </p>
         </v-card-text>
       </v-card>

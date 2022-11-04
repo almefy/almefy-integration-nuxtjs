@@ -9,7 +9,7 @@
     >
       <v-list>
         <v-list-item
-          v-for="(item, i) in items"
+          v-for="(item, i) in itemsByRole"
           :key="i"
           :to="item.to"
           router
@@ -75,14 +75,25 @@ export default {
         {
           icon: 'mdi-apps',
           title: 'Welcome',
+          isAdmin: false,
           to: '#',
           click: e => {
             this.$router.push('/')
           }
         },
         {
+          icon: 'mdi-apps',
+          title: 'User-Management',
+          isAdmin: true,
+          to: '#',
+          click: e => {
+            this.$router.push('/user-management')
+          }
+        },
+        {
           icon: 'mdi-logout',
           title: 'Logout',
+          isAdmin: false,
           click: this.handleLogout,
           to: '#'
         },
@@ -91,6 +102,14 @@ export default {
       right: true,
       rightDrawer: false,
       title: 'Sample on nuxt.js',
+    }
+  },
+  computed: {
+    itemsByRole () {
+      if (this.$store.getters.userRole === "ADMIN")
+        return this.items;
+      else
+        return this.items.filter(i => i.isAdmin === false);
     }
   },
   methods: {

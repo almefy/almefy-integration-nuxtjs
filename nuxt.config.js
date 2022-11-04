@@ -25,6 +25,7 @@ export default {
   modules: [
     'cookie-universal-nuxt',
     '@nuxtjs/axios',
+    ['vuetify-dialog/nuxt', { property: '$dialog' }],
   ],
   router: {
     middleware: ['check-auth', 'auth'],
@@ -58,7 +59,8 @@ export default {
     enrollmentUrl: process.env.ENROLLMENT_URL,
     authControllerUrl: process.env.CONTROLLER_URL,
     authToken: process.env.CONTROLLER_AUTH_TOKEN,
-    mailGlobalMailLocale: process.env.ALMEFY_GLOBAL_MAIL_LOCALE
+    mailGlobalMailLocale: process.env.ALMEFY_GLOBAL_MAIL_LOCALE,
+    publicEnrollment: process.env.PUBLIC_ENROLLMENT,
   },
   privateRuntimeConfig: {
     secretBase64: process.env.ALMEFY_SECRETBASE64,
@@ -80,5 +82,8 @@ export default {
         },
       },
     },
+  },
+  build: {
+    postcss: null,
   },
 }

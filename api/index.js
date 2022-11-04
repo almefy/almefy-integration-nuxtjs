@@ -7,6 +7,7 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const CryptoJS = require("crypto-js");
+const admin = require("./admin");
 
 router.use((req, res, next) => {
   Object.setPrototypeOf(req, app.request)
@@ -16,15 +17,13 @@ router.use((req, res, next) => {
   next()
 });
 
-
-// FIXME check shorthand iat
 function createSignedToken(methodName,urlresult,bodyJson) {
   const iat = Math.floor(new Date().getTime() / 1000);
   const claim = {
     "iss": process.env.ALMEFY_KEY,
     "aud": process.env.ALMEFY_APIHOST,
     iat,
-    "nbf": iat+10,
+    "nbf": iat,
     "exp": iat+10,
     "method": methodName,
     "url": urlresult,
@@ -48,9 +47,25 @@ const validation = [
         .exists()
         .withMessage('email is required')
         .isEmail()
-        .withMessage('email has wrong format'),
+        .withMessage('email has invalid format'),
   ])
 ];
+
+const authorization = (req, res, next) => {
+
+  const secretKeyBase64 = Buffer.from(process.env.ACCESS_SECRETBASE64, "base64");
+  const jwtCookie = req.headers.cookie
+  .split(";")
+  .find(c => c.trim().startsWith(process.env.ACCESS_TOKEN));
+  const token = jwtCookie.split("=")[1];
+  console.log(token)
+  const tokenresult = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
+  req.userId = tokenresult.iss;
+  req.userRole = tokenresult.role;
+
+  return next();
+
+}
 
 function handleValidationErrors(req, res, next) {
   const errors = validationResult(req);
@@ -58,56 +73,116 @@ function handleValidationErrors(req, res, next) {
     console.log(errors);
     return res.status(400).json({ errors: errors.array() });
   }
-  next();
+  return next();
 };
 
-router.post(`/user-controller/enroll`,  validation, handleValidationErrors, (req, res) => {
+router.post(`/user-controller/enroll`,  validation, handleValidationErrors, async (req, res) => {
   try {
 
-      const email = req.body.email;
-      const sendEnrollment = true;
+    const email = req.body.email;
+    const sendEnrollment = true;
 
-      const bodyJson = JSON.stringify({
-        "sendEmail": sendEnrollment,
-        "identifier":`${email}`,
-        "sendEmailTo":`${email}`,
-        "sendEmailLocale":`${process.env.ALMEFY_GLOBAL_MAIL_LOCALE}`
-      });
-      const url = `${process.env.ALMEFY_APIHOST}/v1/entity/identities/enroll`;
-      const signedToken = createSignedToken("POST",url, bodyJson)
+    const bodyJson = JSON.stringify({
+      "sendEmail": sendEnrollment,
+      "identifier":`${email}`,
+      "sendEmailTo":`${email}`,
+      "sendEmailLocale":`${process.env.ALMEFY_GLOBAL_MAIL_LOCALE}`
+    });
+    const url = `${process.env.ALMEFY_APIHOST}/v1/entity/identities/enroll`;
+    const signedToken = createSignedToken("POST",url, bodyJson)
 
-      async function run() {
-        try {
+    try {
 
-          const response = await axios.post(url, bodyJson, {
-            headers: {
-              "Authorization": `Bearer ${signedToken}`,
-              "Content-Type": "application/json; charset=utf-8",
-            }
-          });
-
-          if (response.status===200 || response.status===201) {
-            res.status(200).json({message: `Please check your mailbox ${email} and use the Almefy-APP for testing 2-Factor Authentication (2FA) in One Step. Without password!`});
-          } else {
-            console.log("[API] encrollemnt error 1", response)
-            res.status(400).json({error: "Api returned an error! Error is logged in console"});
-          }
-        } catch (error) {
-          res.status(400).json({error});
-          console.log("[API] enrollment error 2",  (error.response)?error.response:error);
-
+      const response = await axios.post(url, bodyJson, {
+        headers: {
+          "Authorization": `Bearer ${signedToken}`,
+          "Content-Type": "application/json; charset=utf-8",
         }
-      }
-      run();
+      });
 
+      if (response.status===200 || response.status===201) {
+        res.status(200).json({message: `Please check your mailbox ${email} and use the Almefy-APP for testing 2-Factor Authentication (2FA) in One Step. Without password!`});
+      } else {
+        console.log("[API] encrollemnt error 1", response)
+        res.status(400).json({error: "Api returned an error! Error is logged in console"});
+      }
+    } catch (error) {
+      res.status(400).json({error});
+      console.log("[API] enrollment error 2",  (error.response)?error.response:error);
+
+    }
   }
   catch (error) {
     console.log(error);
     res.status(400).json({error});
   }
+
 });
 
-router.get(`/login-controller`, (req, res) => {
+router.delete(`/user-controller/delete`,  authorization, async (req, res) => {
+
+  const bodyJson = null;
+  const identity = req.body.identity;
+
+  try {
+
+    const url = `${process.env.ALMEFY_APIHOST}/v1/entity/identities/`+ "/" + encodeURIComponent(identity);;
+    const signedToken = createSignedToken("DELETE", url, bodyJson)
+
+    const response = await axios.delete(url, {
+      headers: {
+        "Authorization": `Bearer ${signedToken}`,
+        "Content-Type": "application/json; charset=utf-8",
+      }
+    });
+    if (response.status===200 || response.status===201) {
+      res.status(200).json({message: `Identity {identity} deleted`});
+    } else {
+      console.log("[API] encrollemnt error 1", response)
+      res.status(400).json({error: "Api returned an error! Error is logged in console"});
+    }
+  }
+  catch (error) {
+    console.log(error);
+    res.status(400).json({error});
+  }
+
+});
+
+router.post(`/admin-controller/entity/identities`, authorization, async (req, res) => {
+
+  try {
+
+    const bodyJson = null;
+    let url = `${process.env.ALMEFY_APIHOST}/v1/entity/identities`;
+
+    if (req.body.identity) {
+      url += "/" + encodeURIComponent(req.body.email);
+    }
+
+    const signedToken = createSignedToken("GET", url, bodyJson)
+
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          "Authorization": `Bearer ${signedToken}`,
+          "Content-Type": "application/json; charset=utf-8",
+        }
+      })
+      res.status(response.status).json(response.data); // proxy results
+    } catch (error) {
+      console.log("[API] There was an error",  (error.response)?error.response:error);
+      res.status(500).json({"error": "[API] There was an error"});
+    }
+  }
+  catch (error) {
+    console.log("[API] There was an error",  (error.response)?error.response:error);
+    res.status(500).json({"error": "[API] There was an error"});
+  }
+
+});
+
+router.get(`/login-controller`, async (req, res) => {
 
   try {
 
@@ -128,77 +203,81 @@ router.get(`/login-controller`, (req, res) => {
         iss: process.env.ALMEFY_KEY,
         aud: process.env.ALMEFY_APIHOST,
         iat: mytime,
-        nbf: mytime+10,
+        nbf: mytime,
         exp: mytime+10,
         method: "POST",
         url: sendUrl,
         bodyHash: CryptoJS.SHA256(processAuthentificationData).toString()
       };
       const signedToken = jwt.sign(bearerPayload, secretKeyBase64);
+
       console.log("signedToken", signedToken)
-      async function run() {
+      console.log("processAuthentificationData", processAuthentificationData)
 
-        try {
+      try {
 
-          const result = await axios.post(sendUrl, processAuthentificationData, {
-            headers: {
-              "Authorization": `Bearer ${signedToken}`,
-              "Content-Type": "application/json; charset=utf-8",
-            }}
-          );
+        const result = await axios.post(sendUrl, processAuthentificationData, {
+          headers: {
+            "Authorization": `Bearer ${signedToken}`,
+            "Content-Type": "application/json; charset=utf-8",
+          }}
+        );
 
-          if (result.status===200) {
+        if (result.status===200) {
 
-            const secretKeyBase64 = Buffer.from(process.env.ACCESS_SECRETBASE64, "base64");
+          const secretKeyBase64 = Buffer.from(process.env.ACCESS_SECRETBASE64, "base64");
 
-            const accessPayload = {
-              sub: tokenresult.sub,
-            };
+          const accessPayload = {
+            sub: tokenresult.sub,
+            role: (admin.default.find(t => t.identity.toLowerCase() === tokenresult.sub.toLowerCase())? "ADMIN" : "USER")
+          };
 
-            const signOptions = {
-              expiresIn: '86400000',
-              algorithm: 'HS256',
-            }
-            const accessToken = jwt.sign(accessPayload, secretKeyBase64, signOptions);
+          const signOptions = {
+            expiresIn: '86400000',
+            algorithm: 'HS256',
+          };
 
-            console.log("[API] challenge successfully completed", accessToken);
-            console.log(process.env.ACCESS_TOKEN)
-            res.cookie(process.env.ACCESS_TOKEN, accessToken, {
-              // httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-            });
-            res.json({status: 200, "message" : "otp works - created access token and set as jwt cookie"});
+          const accessToken = jwt.sign(accessPayload, secretKeyBase64, signOptions);
+          console.log("[API] challenge successfully completed", accessToken);
+          console.log(process.env.ACCESS_TOKEN);
 
-          } else {
+          res.cookie(process.env.ACCESS_TOKEN, accessToken, {
+            httpOnly: true,
+            sameSite: "strict",
+            secure: process.env.NODE_ENV === "production",
+          });
 
-            console.log("[API] There was an error - reload challenge", result);
-            res.json({status: 400, "message" : "There was an error"});
+          res.json({status: 200, "message" : "otp works - created access token and set as jwt cookie"});
+          console.log("accessPayload", accessPayload);
 
-          }
+        } else {
 
-        } catch (error) {
-
-          console.log("[API] There was an error",  (error.response)?error.response:error);
+          console.log("[API] There was an error - reload challenge", result);
+          res.json({status: 400, "message" : "There was an error"});
 
         }
 
+      } catch (error) {
+
+        console.log("[API] There was an error",  (error.response)?error.response:error);
+
       }
 
-      run();
-
     }
+
   }
   catch (error) {
-
     console.log(error);
-
   }
 
 });
 
-module.exports = {
+router.get(`/login-controller/logout`, (req, res) => {
+  res.clearCookie(process.env.ACCESS_TOKEN);
+  res.end();
+});
 
+module.exports = {
   path: '/api',
   handler: router
-
 }

@@ -6,30 +6,32 @@ import jwt from 'jsonwebtoken';
 Vue.use(Vuex)
 
 export const state = () => ({
-  token: null
+  token: null,
+  payload: null,
 });
 
 export const mutations = {
-  setToken(state, token) {
+  setToken(state, {token, payload}) {
     state.token = token;
+    state.payload = payload;
   },
   clearToken(state) {
     state.token = null;
-  }
+    state.payload = null;
+  },
 }
 
 export const actions = {
   nuxtServerInit(vuexContext, context) {
-    console.log('nuxtServerInit')
-  },
-  authenticateUser(vuexContext, authData) {
-    console.log('authenticateUser')
+    console.log('nuxtServerInit called');
   },
   initAuth(vuexContext, context) {
 
     let token;
+    // let payload;
 
     if (context.req) {
+
       if (!context.req.headers.cookie) {
         return;
       }
@@ -37,6 +39,7 @@ export const actions = {
       const jwtCookie = context.req.headers.cookie
         .split(";")
         .find(c => c.trim().startsWith(process.env.ACCESS_TOKEN));
+
       if (!jwtCookie) {
         return;
       }
@@ -46,34 +49,25 @@ export const actions = {
       const secretKeyBase64 = Buffer.from(process.env.ACCESS_SECRETBASE64, "base64");
       try {
 
-        jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
-        vuexContext.commit("setToken", token);
+        const payload = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
+        // console.log("setToken", token, payload);
+        vuexContext.commit("setToken", {token, payload});
 
-      } catch {
+      } catch (Error) {
 
-        console.log("this token is not valid catch block");
+        // console.log('for some reason we hit a catch block', Error);
         vuexContext.commit("clearToken");
-        console.log(context.$cookies.remove(process.env.ACCESS_TOKEN));
+        this.$axios.get(`${this.$config.authControllerUrl}/logout`);
 
       }
 
-    } else if (process.client) {
-
-      token = localStorage.getItem(process.env.ACCESS_TOKEN);
-      // what to do here?
     }
-
 
   },
   logout(vuexContext, context) {
 
-    console.log(context.$config.accessToken, 'we are here');
     vuexContext.commit("clearToken");
-    context.$cookies.remove(context.$config.accessToken);
-
-    if (process.client) {
-      localStorage.removeItem(context.$config.accessToken);
-    }
+    this.$axios.get(`${this.$config.authControllerUrl}/logout`);
 
   }
 }
@@ -81,5 +75,12 @@ export const actions = {
 export const getters = {
   isAuthenticated(state) {
     return state.token != null;
+  },
+  userIdentity(state) {
+    return ((state.payload!=null && state.payload.sub!=null)?state.payload.sub:undefined);
+  },
+  userRole(state) {
+    return ((state.payload!=null && state.payload.role!=null)?state.payload.role:undefined);
   }
+
 }
