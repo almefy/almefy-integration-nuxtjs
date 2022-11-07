@@ -51,7 +51,12 @@ you are automatically detected as Admin of this page and got an extra menuitem w
 
 # Adjust the local JWT-Key
 
-The last but not needed step is creating a unique JWT Token with your identity signed with a secret key in your .env (ACCESS_SECRETBASE64) file.
+The last but not needed step is creating a unique JWT Token with your identity signed with a secret key in your .env (ACCESS_SECRETBASE64) file. Please use 
+```
+node createSecret.js
+```
+to get your own random key and secret. Currently only the secret is needed for hsm256 symmetric enrcyption of the JWT-token.
+
 
 # Summary 
 
