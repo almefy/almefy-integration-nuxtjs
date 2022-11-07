@@ -57,7 +57,8 @@
         </v-col>
       </v-row>
     </v-container>
-    <v-snackbar
+<!--
+      <v-snackbar
       v-model="enrollmentHint"
       :timeout="enrollmentTimeout"
     >
@@ -74,6 +75,7 @@
         </v-btn>
       </template>
     </v-snackbar>
+  -->
   </v-app>
 
 </template>
@@ -83,9 +85,9 @@
   export default {
     layout: 'default',
     data: () => ({
-      enrollmentHint: false,
-      enrollmentTimeout: 4000,
-      text: '',
+      // enrollmentHint: false,
+      // enrollmentTimeout: 4000,
+      // text: '',
       showLogin: true,
       isFormValid: false,
       email: '',
@@ -134,18 +136,16 @@
         if (!this.isFormValid)
           return;
 
-        this.enrollmentHint=true;
         const data = {"email": this.email};
         const me = this;
+
         this.$axios.post(`${this.$config.enrollmentUrl}`, data).then((response) => {
           if (response.status===200) {
-            me.text = response.data.message;
-            me.enrollmentHint=true;
+            this.$dialog.notify.info(response.data.message, { position: 'bottom-right', timeout: 10000 });
             me.email="";
             me.showLogin=true;
           } else {
-            me.enrollmentHint=true;
-            me.text = response.error;
+            this.$dialog.notify.error(response.error, { position: 'bottom-right', timeout: 10000 });
           }
         });
 
@@ -160,7 +160,7 @@
             }).then(response => {
               if (response.status===200) {
                 console.log('Got the roundtrip completly, create own JWT token based on secret with identity');
-                this.$router.push(this.$config.homeRoute);
+                location.reload(this.$config.homeRoute)
               }
             })
           } else {

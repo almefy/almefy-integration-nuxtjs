@@ -57,6 +57,7 @@ export default {
     apiHost: process.env.ALMEFY_APIHOST,
     accessKey: process.env.ALMEFY_KEY,
     enrollmentUrl: process.env.ENROLLMENT_URL,
+    removeIdentityUrl: process.env.DELETEIDENITY_URL,
     authControllerUrl: process.env.CONTROLLER_URL,
     authToken: process.env.CONTROLLER_AUTH_TOKEN,
     mailGlobalMailLocale: process.env.ALMEFY_GLOBAL_MAIL_LOCALE,

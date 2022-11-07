@@ -29,7 +29,6 @@ export const actions = {
 
     let token;
     // let payload;
-
     if (context.req) {
 
       if (!context.req.headers.cookie) {
@@ -50,7 +49,7 @@ export const actions = {
       try {
 
         const payload = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
-        // console.log("setToken", token, payload);
+        console.log("setToken", token, payload);
         vuexContext.commit("setToken", {token, payload});
 
       } catch (Error) {

@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const fs = require("fs");
 const express = require("express");
 const { check, oneOf, validationResult } = require('express-validator/check');
 const router = express.Router();
@@ -7,7 +8,8 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const CryptoJS = require("crypto-js");
-const admin = require("./admin");
+
+// const admin = require("./admin");
 
 router.use((req, res, next) => {
   Object.setPrototypeOf(req, app.request)
@@ -58,22 +60,22 @@ const authorization = (req, res, next) => {
   .split(";")
   .find(c => c.trim().startsWith(process.env.ACCESS_TOKEN));
   const token = jwtCookie.split("=")[1];
-  console.log(token)
   const tokenresult = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
   req.userId = tokenresult.iss;
   req.userRole = tokenresult.role;
-
   return next();
 
-}
+};
 
 function handleValidationErrors(req, res, next) {
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors);
     return res.status(400).json({ errors: errors.array() });
   }
   return next();
+
 };
 
 router.post(`/user-controller/enroll`,  validation, handleValidationErrors, async (req, res) => {
@@ -119,14 +121,14 @@ router.post(`/user-controller/enroll`,  validation, handleValidationErrors, asyn
 
 });
 
-router.delete(`/user-controller/delete`,  authorization, async (req, res) => {
+router.post(`/user-controller/delete`,  authorization, async (req, res) => {
 
   const bodyJson = null;
-  const identity = req.body.identity;
+  const email = req.body.email;
 
   try {
 
-    const url = `${process.env.ALMEFY_APIHOST}/v1/entity/identities/`+ "/" + encodeURIComponent(identity);;
+    const url = `${process.env.ALMEFY_APIHOST}/v1/entity/identities`+ "/" + encodeURIComponent(email);;
     const signedToken = createSignedToken("DELETE", url, bodyJson)
 
     const response = await axios.delete(url, {
@@ -135,10 +137,10 @@ router.delete(`/user-controller/delete`,  authorization, async (req, res) => {
         "Content-Type": "application/json; charset=utf-8",
       }
     });
-    if (response.status===200 || response.status===201) {
-      res.status(200).json({message: `Identity {identity} deleted`});
+    if (response.status===204) {
+      res.status(response.status).json({message: `Identity {email} deleted`});
     } else {
-      console.log("[API] encrollemnt error 1", response)
+      console.log("[API] enrollment error", response)
       res.status(400).json({error: "Api returned an error! Error is logged in console"});
     }
   }
@@ -211,8 +213,8 @@ router.get(`/login-controller`, async (req, res) => {
       };
       const signedToken = jwt.sign(bearerPayload, secretKeyBase64);
 
-      console.log("signedToken", signedToken)
-      console.log("processAuthentificationData", processAuthentificationData)
+      console.log("signedToken", signedToken);
+      console.log("processAuthentificationData", processAuthentificationData);
 
       try {
 
@@ -227,9 +229,11 @@ router.get(`/login-controller`, async (req, res) => {
 
           const secretKeyBase64 = Buffer.from(process.env.ACCESS_SECRETBASE64, "base64");
 
+          const admin = JSON.parse(fs.readFileSync('./api/admin.json', 'utf8'));
+          console.log(admin)
           const accessPayload = {
             sub: tokenresult.sub,
-            role: (admin.default.find(t => t.identity.toLowerCase() === tokenresult.sub.toLowerCase())? "ADMIN" : "USER")
+            role: (admin.find(t => t.identity.toLowerCase() === tokenresult.sub.toLowerCase())? "ADMIN" : "USER")
           };
 
           const signOptions = {

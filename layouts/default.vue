@@ -106,6 +106,8 @@ export default {
   },
   computed: {
     itemsByRole () {
+
+      console.log(this.$store.getters.userRole);
       if (this.$store.getters.userRole === "ADMIN")
         return this.items;
       else
@@ -113,7 +115,6 @@ export default {
     }
   },
   methods: {
-
     async handleLogout() {
       await this.$store.dispatch("logout", this);
       this.$router.push(this.$config.loginRoute);

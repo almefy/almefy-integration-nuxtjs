@@ -2,7 +2,7 @@
 <v-container grid-list-xl fluid>
   <v-card>
     <v-card-title>
-        <v-spacer></v-spacer>
+        <v-spacer><v-btn @click="reloadGrid">Reload grid</v-btn></v-spacer>
         <v-spacer></v-spacer>
         <v-spacer></v-spacer>
         <v-spacer></v-spacer>
@@ -32,9 +32,9 @@
         <v-btn icon v-bind="item" @click.stop="sendEnrollment(item)">
             <v-icon>mdi-plus</v-icon>
         </v-btn>
-        <v-btn icon v-bind="item" @click.stop="editIdentity(item)">
+        <!--<v-btn icon v-bind="item" @click.stop="editIdentity(item)">
             <v-icon>mdi-pencil</v-icon>
-        </v-btn>
+        </v-btn>-->
         <v-btn icon v-bind="item" @click.stop="deleteIdentity(item)">
             <v-icon>mdi-delete</v-icon>
         </v-btn>
@@ -44,15 +44,43 @@
 
   </v-card>
 
+  <br />
+
+  <v-card>
+    <v-row no-gutters>
+      <v-col cols="12" md="4">
+        <v-container>
+          <v-form ref="form" v-model="isFormValid">
+            <v-text-field
+              v-model="email"
+              label="E-mail"
+              :rules="emailRules"
+              full-width
+            ></v-text-field>
+            <v-btn @click="enrollUser">Enroll new identity</v-btn>
+          </v-form>
+        </v-container>
+      </v-col>
+    </v-row>
+  </v-card>
 
 </v-container>
 </template>
 
 <script>
+
+import tokenForm from '~/components/token-management.vue'
+
 export default {
   name: 'Default',
   data() {
     return {
+      isFormValid: false,
+      email: '',
+      emailRules: [
+        v => !!v || 'E-mail is required',
+        v => !v || /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$/.test(v) || 'E-mail must be valid'
+      ],
       totalIdentities: 0,
       identities: [],
       loading: false,
@@ -61,7 +89,7 @@ export default {
           itemsPerPage: 50,
           sortBy: ['identifier'],
           sortDesc: [false],
-        },
+      },
       search: '',
       headers: [
         {
@@ -80,7 +108,6 @@ export default {
       },
       rowsPerPage: 5,
       mode: "edit",
-
     }
   },
   watch: {
@@ -96,22 +123,6 @@ export default {
       },
       deep: true,
     },
-  },
-  actions: {
-    type: Object,
-    default () {
-      const that = this;
-      return {
-        Cancel: "Cancel",
-        OK: {
-          text: "OK",
-          color: "red",
-          handle: () => {
-            that.$emit("delete", this.item);
-          }
-        }
-      }
-    }
   },
   methods: {
     clearSearch () {
@@ -129,22 +140,76 @@ export default {
       this.rowsPerPage=10;
     },
     async sendEnrollment(item) {
-      const data = {"email": item.identifier};
-      console.log(data)
-      await this.$axios.post(`${this.$config.enrollmentUrl}`, data).then((response) => {
-        if (response.status===200) {
-          this.$dialog.notify.info(`A new enrollment email was send to {item.identifier}`, { position: 'bottom-right', timeout: 5000 });
+      await this.$dialog.confirm({
+        text: `Do you realy want to send a new enrollment to ${item.identifier}?`,
+        title: 'Send enrollment',
+        actions: {
+          false: 'No',
+          true: {
+            color: 'red',
+            text: 'Yes I do',
+            handle: async () => {
+              const data = {"email": item.identifier};
+              await this.$axios.post(`${this.$config.enrollmentUrl}`, data).then((response) => {
+                if (response.status===200) {
+                  this.$dialog.notify.info(`A new enrollment email was send to ${item.identifier}`, { position: 'bottom-right', timeout: 5000 });
+                }
+              });
+            }
+          }
         }
       });
     },
     editIdentity(item) {
-      console.log('editIdentity');
-      this.$dialog.notify.error(`Delete customer triggered but currently disabled`, { position: 'bottom-right', timeout: 2000 });
+      this.$dialog.show(tokenForm, {identifier: item.identifier})
     },
-    deleteIdentity(item) {
-      console.log('deleteIdentity');
-      this.$dialog.notify.error(`Delete customer triggered but currently disabled`, { position: 'bottom-right', timeout: 2000 });
+    async deleteIdentity(item) {
+      await this.$dialog.confirm({
+        text: `Do you really want to delete the identifier ${item.identifier}?`,
+        title: 'Delete Identity',
+        actions: {
+          false: 'No',
+          true: {
+            color: 'red',
+            text: 'Yes I do',
+            handle: async () => {
+              const data = {"email": item.identifier};
+              await this.$axios.post(`${this.$config.removeIdentityUrl}`, data).then((response) => {
+                if (response.status===204) {
+                  this.$dialog.notify.info(`The Identity ${item.identifier} was removed!`, { position: 'bottom-right', timeout: 5000 });
+                }
+              });
+              await this.getDataFromApi();
+            }
+          }
+        }
+      });
     },
+    async reloadGrid() {
+      await this.getDataFromApi();
+      this.$dialog.notify.info(`The grid was reloaded`, { position: 'bottom-right', timeout: 2000 });
+    },
+    async enrollUser() {
+
+      this.$refs.form.validate();
+
+      if (!this.isFormValid)
+        return;
+
+      const data = {"email": this.email};
+      const me = this;
+
+      await this.$axios.post(`${this.$config.enrollmentUrl}`, data).then((response) => {
+        if (response.status===200) {
+          this.$dialog.notify.info(response.data.message, { position: 'bottom-right', timeout: 10000 });
+          me.email="";
+          me.showLogin=true;
+        } else {
+          this.$dialog.notify.error(response.error, { position: 'bottom-right', timeout: 10000 });
+        }
+      });
+
+      },
   }
 }
 </script>
