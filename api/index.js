@@ -128,7 +128,7 @@ router.post(`/user-controller/delete`,  authorization, async (req, res) => {
 
   try {
 
-    const url = `${process.env.ALMEFY_APIHOST}/v1/entity/identities`+ "/" + encodeURIComponent(email);;
+    const url = `${process.env.ALMEFY_APIHOST}/v1/entity/identities`+ "/" + encodeURIComponent(email);
     const signedToken = createSignedToken("DELETE", url, bodyJson)
 
     const response = await axios.delete(url, {
@@ -151,6 +151,36 @@ router.post(`/user-controller/delete`,  authorization, async (req, res) => {
 
 });
 
+router.post(`/user-controller/deleteToken`,  authorization, async (req, res) => {
+
+  const bodyJson = null;
+  const id = req.body.id;
+
+  try {
+
+    const url = `${process.env.ALMEFY_APIHOST}/v1/entity/tokens`+ "/" + id;
+    const signedToken = createSignedToken("DELETE", url, bodyJson)
+
+    const response = await axios.delete(url, {
+      headers: {
+        "Authorization": `Bearer ${signedToken}`,
+        "Content-Type": "application/json; charset=utf-8",
+      }
+    });
+    if (response.status===204) {
+      res.status(response.status).json({message: `Token deleted`});
+    } else {
+      console.log("[API] enrollment error", response)
+      res.status(400).json({error: "Api returned an error! Error is logged in console"});
+    }
+  }
+  catch (error) {
+    console.log(error);
+    res.status(400).json({error});
+  }
+
+});
+
 router.post(`/admin-controller/entity/identities`, authorization, async (req, res) => {
 
   try {
@@ -158,7 +188,7 @@ router.post(`/admin-controller/entity/identities`, authorization, async (req, re
     const bodyJson = null;
     let url = `${process.env.ALMEFY_APIHOST}/v1/entity/identities`;
 
-    if (req.body.identity) {
+    if (req.body.email) {
       url += "/" + encodeURIComponent(req.body.email);
     }
 

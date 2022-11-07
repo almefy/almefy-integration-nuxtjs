@@ -2,7 +2,7 @@
 <v-container grid-list-xl fluid>
   <v-card>
     <v-card-title>
-        <v-spacer><v-btn @click="reloadGrid">Reload grid</v-btn></v-spacer>
+        <v-spacer><v-btn @click="reloadIdentities">Reload Identities</v-btn></v-spacer>
         <v-spacer></v-spacer>
         <v-spacer></v-spacer>
         <v-spacer></v-spacer>
@@ -32,9 +32,9 @@
         <v-btn icon v-bind="item" @click.stop="sendEnrollment(item)">
             <v-icon>mdi-plus</v-icon>
         </v-btn>
-        <!--<v-btn icon v-bind="item" @click.stop="editIdentity(item)">
+        <v-btn icon v-bind="item" @click.stop="editIdentity(item)">
             <v-icon>mdi-pencil</v-icon>
-        </v-btn>-->
+        </v-btn>
         <v-btn icon v-bind="item" @click.stop="deleteIdentity(item)">
             <v-icon>mdi-delete</v-icon>
         </v-btn>
@@ -161,7 +161,7 @@ export default {
       });
     },
     editIdentity(item) {
-      this.$dialog.show(tokenForm, {identifier: item.identifier})
+      this.$dialog.show(tokenForm, {identifier: item.identifier, parent: this}, {"max-width":"600px"})
     },
     async deleteIdentity(item) {
       await this.$dialog.confirm({
@@ -185,7 +185,7 @@ export default {
         }
       });
     },
-    async reloadGrid() {
+    async reloadIdentities() {
       await this.getDataFromApi();
       this.$dialog.notify.info(`The grid was reloaded`, { position: 'bottom-right', timeout: 2000 });
     },

@@ -1,5 +1,5 @@
 <template>
-  <DialogCard title="Login" :actions="actions">
+  <DialogCard title="Devices of Identity" :actions="actions">
     <v-card>
         <v-data-table
           :headers="headers"
@@ -27,14 +27,12 @@ export default {
     identifier: {
       default: '',
       type: String
+    },
+    parent: {
+      default: null,
+      type: Object
     }
   },
-  // overlay: 'default',
-  //   asyncData () {
-  //         return new Promise(resolve => {
-  //           setTimeout(resolve, 3000)
-  //         })
-  // },
   data () {
     return {
       totalTokens: 0,
@@ -90,14 +88,37 @@ export default {
     },
     async getDataFromApi () {
       const data = {email: this.identifier}
-      const result = await this.$axios.post(`/api/admin-controller/entity/identities`, data);
+      const result = await this.parent.$axios.post(`/api/admin-controller/entity/identities`, data);
 
-      if (result.data) {
-        this.identities = result.data;
-        this.totalIdentities = this.identities.total_count;
+      if (result.data && result.data.tokens) {
+
+        this.tokens = result.data.tokens;
+        this.totalTokens = this.tokens.total_count;
       }
       this.loading = false;
       this.rowsPerPage=10;
+    },
+    async deleteToken(item){
+      await this.parent.$dialog.confirm({
+        text: `Do you really want to delete the token (identitiy link to device) ${item.name}?`,
+        title: 'Delete token (identitiy link to device)',
+        actions: {
+          false: 'No',
+          true: {
+            color: 'red',
+            text: 'Yes I do',
+            handle: async () => {
+              const data = {"id": item.id};
+              await this.parent.$axios.post(`${this.$config.removeTokenUrl}`, data).then((response) => {
+                if (response.status===204) {
+                  this.parent.$dialog.notify.info(`The Token ${item.id} was removed!`, { position: 'bottom-right', timeout: 5000 });
+                }
+              });
+              await this.getDataFromApi();
+            }
+          }
+        }
+      })
     }
   }
 }
