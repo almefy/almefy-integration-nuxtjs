@@ -100,8 +100,8 @@ export default {
     },
     async deleteToken(item){
       await this.parent.$dialog.confirm({
-        text: `Do you really want to delete the token (identitiy link to device) ${item.name}?`,
-        title: 'Delete token (identitiy link to device)',
+        text: `Do you really want to delete the token (identity link to device) ${item.name}?`,
+        title: 'Delete token (identity link to device)',
         actions: {
           false: 'No',
           true: {
@@ -111,7 +111,7 @@ export default {
               const data = {"id": item.id};
               await this.parent.$axios.post(`${this.$config.removeTokenUrl}`, data).then((response) => {
                 if (response.status===204) {
-                  this.parent.$dialog.notify.info(`The Token ${item.id} was removed!`, { position: 'bottom-right', timeout: 5000 });
+                  this.parent.$dialog.notify.info(`The token ${item.id} for this identity is removed!`, { position: 'bottom-right', timeout: 5000 });
                 }
               });
               await this.getDataFromApi();

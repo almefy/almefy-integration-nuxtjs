@@ -166,7 +166,7 @@ export default {
     async deleteIdentity(item) {
       await this.$dialog.confirm({
         text: `Do you really want to delete the identifier ${item.identifier}?`,
-        title: 'Delete Identity',
+        title: 'Delete identity',
         actions: {
           false: 'No',
           true: {
@@ -176,7 +176,7 @@ export default {
               const data = {"email": item.identifier};
               await this.$axios.post(`${this.$config.removeIdentityUrl}`, data).then((response) => {
                 if (response.status===204) {
-                  this.$dialog.notify.info(`The Identity ${item.identifier} was removed!`, { position: 'bottom-right', timeout: 5000 });
+                  this.$dialog.notify.info(`The identity ${item.identifier} is removed!`, { position: 'bottom-right', timeout: 5000 });
                 }
               });
               await this.getDataFromApi();
