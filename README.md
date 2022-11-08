@@ -13,10 +13,11 @@ $ npm install
 ```
 Please copy .env.sample to .env and adjust your values. Please be sure to enter your given 
 ``` 
-ALMEFY_KEY= and ALMEFY_SECRETBASE64=
+ALMEFY_KEY
+ALMEFY_SECRETBASE64
 ```
 
-MaybeYou should receive some warnings (node) but for testing purposes they can be ignored.  
+MaybeYou could receive some warnings but for testing purposes they can be ignored.  
 After `npm run dev` the site should be available at the url http://localhost:3033
 
 Please be sure you downloaded the mobile App
@@ -25,29 +26,32 @@ or Apple Store https://apps.apple.com/app/instalog-in/id1097751906
 
 
 ## Serve web at localhost:3033
-``` 
+```bash
+# Please be sure to set PUBLIC_ENROLLMENT=true in your .env, otherwise no first enrollment is possible to create your account
 $ npm run dev
-
-Please be sure to set PUBLIC_ENROLLMENT=true in your .env 
 ``` 
 
-Please enroll your identity, send the provisioning email and scan with the APP to activate your account for this Sample Login via nuxt.js.
+Please enroll your identity, receive yout provisioning email and scan with the mobile App to activate your account for this Sample Login via nuxt.js.
 
-After doing that you can identify yourself with secure Authentication in One Step. Without password! Based on IBE! A local JWT Token is created and set as httponly cookie to identify yourself in every roundtrip.
+After this things are done you can identify yourself with secure Authentication in One Step. Without password! Based on IBE! And you as you see - you need serverside nothing - no passwordstore for data.
+
+Local JWT Token is created and set as httponly cookie to identify yourself in every roundtrip (look at /api/index.js - this is the small server part of this sample app)
 
 Now you can disable
-```
+```bash
 PUBLIC_ENROLLMENT=false
 ```
 
 If you enter yourself in /api/admin.json
-```
+```bash
 [
-  {"identity": "your@email.adress"}
+  {"identity": "your@email.adress"},
 ]
 ```
 
-you are automatically detected as Admin of this page and got an extra menuitem where you are enable to enroll more users and resend enrollments or delete them.
+After done that, and re-login in you are automatically detected as admin and got an extra menuitem where you are enable to enroll more users and resend enrollments or delete them.
+
+For enrichment of userdata, you could create your own database only with that identity as key and you needed data to fetch if user logs in.
 
 # Adjust the local JWT-Key
 
@@ -65,7 +69,7 @@ There a several console in the browser-debugger and starting shell and you can a
 Planned improvments the next weeks
 
 - move to public git
-- enable per identity view of tokens enrolled
+- clean up code a bit, for better readability
 - set admin-role via web-interface
+- display more userdata on a profile page
 - enable enrollment without email locally on screen
-- 
