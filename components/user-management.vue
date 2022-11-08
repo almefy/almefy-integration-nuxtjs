@@ -141,7 +141,7 @@ export default {
     },
     async sendEnrollment(item) {
       await this.$dialog.confirm({
-        text: `Do you realy want to send a new enrollment to ${item.identifier}?`,
+        text: `Do you really want to send a new enrollment to ${item.identifier}?`,
         title: 'Send enrollment',
         actions: {
           false: 'No',
