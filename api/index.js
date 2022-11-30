@@ -218,9 +218,9 @@ router.post(`/admin-controller/entity/identities`, authorization, async (req, re
 router.get(`/odoo-test`, (req, res) => {
   console.log(req.body);
   res.status(200).json({
-    "organizationId": "UUID",
-    "userId": "UUID",
-    "entityId": "UUID",
+    "organizationId": "dc1f96ac-ef2f-4215-bb96-e2b2d61907e9",
+    "userId": "2f5d69d7-f2ba-44dc-ae43-5b2037bde35b",
+    "entityId": "37961f4e-ffc6-4b29-8cec-436b56a86d08",
     "apiKey": "API_KEY",
     "apiSecret": "API_SECRET"
 
@@ -230,9 +230,9 @@ router.get(`/odoo-test`, (req, res) => {
 router.post(`/odoo-test`, (req, res) => {
   console.log(req.body);
   res.status(200).json({
-    "organizationId": "UUID",
-    "userId": "UUID",
-    "entityId": "UUID",
+    "organizationId": "dc1f96ac-ef2f-4215-bb96-e2b2d61907e9",
+    "userId": "2f5d69d7-f2ba-44dc-ae43-5b2037bde35b",
+    "entityId": "37961f4e-ffc6-4b29-8cec-436b56a86d08",
     "apiKey": "API_KEY",
     "apiSecret": "API_SECRET"
 
