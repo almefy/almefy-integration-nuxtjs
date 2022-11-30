@@ -227,6 +227,18 @@ router.get(`/odoo-test`, (req, res) => {
   });
 });
 
+router.post(`/odoo-test`, (req, res) => {
+  console.log(req.body);
+  res.status(200).json({
+    "organizationId": "UUID",
+    "userId": "UUID",
+    "entityId": "UUID",
+    "apiKey": "API_KEY",
+    "apiSecret": "API_SECRET"
+
+  });
+});
+
 router.get(`/login-controller`, async (req, res) => {
 
   try {
