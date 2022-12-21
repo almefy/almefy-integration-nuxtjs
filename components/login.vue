@@ -9,7 +9,7 @@
             <v-row no-gutters>
               <v-col cols="12" md="8" class="black--text">
                 <v-card-title class="text-h3"><Logo/></v-card-title>
-                <v-card-subtitle class="text-h6">Sample Login on nuxt.js</v-card-subtitle>
+                <v-card-subtitle class="text-h7">{{  loginPageMessage }}</v-card-subtitle>
                 <v-card-text><small>Version {{ version }}</small>
                 <v-card-text><v-btn v-show="publicEnrollmentMail || publicEnrollmentLocal" @click="showLogin = !showLogin">Connect user and device here</v-btn></v-card-text>
                 </v-card-text>
@@ -59,7 +59,7 @@
                       <v-btn @click="enrollUserViaLocal">Get a new connect QR Code</v-btn>
                     </v-container>
                     <v-btn v-show="publicEnrollmentMail && enrollImages==null" @click="enrollUserViaMail">Connect via Mail</v-btn>
-                    <v-btn v-show="publicEnrollmentLocal && enrollImages==null" @click="enrollUserViaLocal">Connect direct via Image</v-btn>
+                    <v-btn v-show="publicEnrollmentLocal && enrollImages==null" @click="enrollUserViaLocal">Connect direct via QR-Code</v-btn>
                   </v-form>
                 </v-container>
               </v-col>
@@ -96,7 +96,8 @@
       publicEnrollmentMail: false,
       publicEnrollmentLocal: false,
       enrollImages: null,
-      version: null
+      version: null,
+      loginPageMessage: null
     }),
     watch: {
       showLogin(newval, oldval) {
@@ -110,6 +111,7 @@
     },
     mounted() {
       this.version = this.$config.clientVersion;
+      this.loginPageMessage = this.$config.loginPageMessage;
       this.publicEnrollmentMail = this.$config.publicEnrollmentMail;
       this.publicEnrollmentLocal = this.$config.publicEnrollmentLocal;
       this.startChallenge();

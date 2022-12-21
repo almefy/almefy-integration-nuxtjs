@@ -67,6 +67,7 @@ export default {
     publicEnrollmentMail: process.env.PUBLIC_ENROLLMENT_MAIL,
     publicEnrollmentLocal: process.env.PUBLIC_ENROLLMENT_LOCAL,
     clientVersion: pkg.version,
+    loginPageMessage: process.env.LOGIN_DIALOG_MESSAGE,
   },
   privateRuntimeConfig: {
     secretBase64: process.env.ALMEFY_SECRETBASE64,
