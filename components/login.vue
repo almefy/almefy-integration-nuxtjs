@@ -10,7 +10,7 @@
               <v-col cols="12" md="8" class="black--text">
                 <v-card-title class="text-h3"><Logo/></v-card-title>
                 <v-card-subtitle class="text-h6">Sample Login on nuxt.js</v-card-subtitle>
-                <v-card-text><small>Version 1.0a</small>
+                <v-card-text><small>Version {{ version }}</small>
                 <v-card-text><v-btn v-show="publicEnrollmentMail || publicEnrollmentLocal" @click="showLogin = !showLogin">Connect user and device here</v-btn></v-card-text>
                 </v-card-text>
 
@@ -36,7 +36,7 @@
               <v-col cols="12" md="4" class="black--text">
                 <v-card-title class="text-h3"><Logo/></v-card-title>
                 <v-card-subtitle class="text-h6">Connect user and device here</v-card-subtitle>
-                <v-card-text><small>Version 1.0a</small></v-card-text>
+                <v-card-text><small>Version 0.2</small></v-card-text>
                 <v-card-text><v-btn @click="enrollImages = null; email = ''; showLogin = !showLogin">Back to login</v-btn></v-card-text>
               </v-col>
               <v-col cols="12" md="8">
@@ -73,7 +73,6 @@
 </template>
 
 <script>
-
   export default {
     layout: 'default',
     data: () => ({
@@ -97,6 +96,7 @@
       publicEnrollmentMail: false,
       publicEnrollmentLocal: false,
       enrollImages: null,
+      version: null
     }),
     watch: {
       showLogin(newval, oldval) {
@@ -109,10 +109,9 @@
       }
     },
     mounted() {
+      this.version = this.$config.clientVersion;
       this.publicEnrollmentMail = this.$config.publicEnrollmentMail;
       this.publicEnrollmentLocal = this.$config.publicEnrollmentLocal;
-      console.log(this.publicEnrollmentMail);
-      console.log(this.publicEnrollmentLocal);
       this.startChallenge();
     },
     methods: {

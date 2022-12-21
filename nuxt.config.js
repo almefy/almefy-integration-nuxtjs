@@ -3,6 +3,8 @@ import colors from 'vuetify/es5/util/colors';
 import  bodyParser from 'body-parser';
 // const axios = require("axios");
 
+import pkg from './package.json';
+
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -64,6 +66,7 @@ export default {
     mailGlobalMailLocale: process.env.ALMEFY_GLOBAL_MAIL_LOCALE,
     publicEnrollmentMail: process.env.PUBLIC_ENROLLMENT_MAIL,
     publicEnrollmentLocal: process.env.PUBLIC_ENROLLMENT_LOCAL,
+    clientVersion: pkg.version,
   },
   privateRuntimeConfig: {
     secretBase64: process.env.ALMEFY_SECRETBASE64,
