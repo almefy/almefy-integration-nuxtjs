@@ -62,12 +62,8 @@ export default {
     authControllerUrl: process.env.CONTROLLER_URL,
     authToken: process.env.CONTROLLER_AUTH_TOKEN,
     mailGlobalMailLocale: process.env.ALMEFY_GLOBAL_MAIL_LOCALE,
-<<<<<<< HEAD
-    publicEnrollment: process.env.PUBLIC_ENROLLMENT,
-=======
     publicEnrollmentMail: process.env.PUBLIC_ENROLLMENT_MAIL,
     publicEnrollmentLocal: process.env.PUBLIC_ENROLLMENT_LOCAL,
->>>>>>> 5b00c998c62f45dcce80298b4d461459477f3f42
   },
   privateRuntimeConfig: {
     secretBase64: process.env.ALMEFY_SECRETBASE64,

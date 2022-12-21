@@ -82,11 +82,7 @@ router.post(`/user-controller/enroll`,  validation, handleValidationErrors, asyn
   try {
 
     const email = req.body.email;
-<<<<<<< HEAD
-    const sendEnrollment = true;
-=======
     const sendEnrollment = req.body.sendEnrollment;
->>>>>>> 5b00c998c62f45dcce80298b4d461459477f3f42
 
     const bodyJson = JSON.stringify({
       "sendEmail": sendEnrollment,
@@ -103,26 +99,13 @@ router.post(`/user-controller/enroll`,  validation, handleValidationErrors, asyn
         headers: {
           "Authorization": `Bearer ${signedToken}`,
           "Content-Type": "application/json; charset=utf-8",
-<<<<<<< HEAD
-=======
         },
         validateStatus (status) {
           return status < 500; // Resolve only if the status code is less than 500
->>>>>>> 5b00c998c62f45dcce80298b4d461459477f3f42
         }
       });
 
       if (response.status===200 || response.status===201) {
-<<<<<<< HEAD
-        res.status(200).json({message: `Please check your mailbox ${email} and use the Almefy-APP for testing 2-Factor Authentication (2FA) in One Step. Without password!`});
-      } else {
-        console.log("[API] encrollemnt error 1", response)
-        res.status(400).json({error: "Api returned an error! Error is logged in console"});
-      }
-    } catch (error) {
-      res.status(400).json({error});
-      console.log("[API] enrollment error 2",  (error.response)?error.response:error);
-=======
         if (sendEnrollment)
           res.status(200).json({message: `Please check your mailbox ${email} and use the Almefy-APP testing 2-Factor Authentication (2FA) in One Step. Without password!`});
         else {
@@ -152,7 +135,6 @@ router.post(`/user-controller/enroll`,  validation, handleValidationErrors, asyn
         console.log('Error', error.message);
       }
       console.log(error.config);
->>>>>>> 5b00c998c62f45dcce80298b4d461459477f3f42
 
     }
   }
