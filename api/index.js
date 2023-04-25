@@ -61,6 +61,7 @@ const authorization = (req, res, next) => {
   .find(c => c.trim().startsWith(process.env.ACCESS_TOKEN));
   const token = jwtCookie.split("=")[1];
   const tokenresult = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
+
   req.userId = tokenresult.iss;
   req.userRole = tokenresult.role;
   req.session = tokenresult.session;
@@ -244,6 +245,7 @@ router.get(`/login-controller`, async (req, res) => {
   try {
 
     const token = req.get(process.env.CONTROLLER_AUTH_TOKEN);
+    console.log("token", token);
 
     if (token) {
 
@@ -270,8 +272,8 @@ router.get(`/login-controller`, async (req, res) => {
         };
         const signedToken = jwt.sign(bearerPayload, secretKeyBase64);
 
-        // console.log("signedToken", signedToken);
-        // console.log("processAuthentificationData", processAuthentificationData);
+        console.log("signedToken", signedToken);
+        console.log("processAuthentificationData", processAuthentificationData);
 
         const result = await axios.post(sendUrl, processAuthentificationData, {
           headers: {
@@ -305,6 +307,7 @@ router.get(`/login-controller`, async (req, res) => {
             sameSite: "strict",
             secure: process.env.NODE_ENV === "production",
           });
+
           res.redirect('/');
 
           // res.json({status: 200, "message" : "otp works - created access token and set as jwt cookie"});

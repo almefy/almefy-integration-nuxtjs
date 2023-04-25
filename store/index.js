@@ -78,5 +78,4 @@ export const getters = {
   userRole(state) {
     return ((state.payload!=null && state.payload.role!=null)?state.payload.role:undefined);
   }
-
 }
