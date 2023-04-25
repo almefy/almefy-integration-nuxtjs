@@ -106,9 +106,8 @@ export default {
   },
   computed: {
     itemsByRole () {
-
-      console.log(this.$store.getters.userRole);
-      if (this.$store.getters.userRole === "ADMIN")
+      // console.log(this.$store.getters.userRole);
+      if (this.$store.getters.userRole === "ROLE_ADMIN")
         return this.items;
       else
         return this.items.filter(i => i.isAdmin === false);

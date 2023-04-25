@@ -63,6 +63,7 @@ const authorization = (req, res, next) => {
   const tokenresult = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
   req.userId = tokenresult.iss;
   req.userRole = tokenresult.role;
+  req.session = tokenresult.session;
   return next();
 
 };
@@ -109,7 +110,7 @@ router.post(`/user-controller/enroll`,  validation, handleValidationErrors, asyn
         if (sendEnrollment)
           res.status(200).json({message: `Please check your mailbox ${email} and use the Almefy-APP testing 2-Factor Authentication (2FA) in One Step. Without password!`});
         else {
-          console.log(response.data);
+          // console.log(response.data);
           res.status(200).json({"base64ImageData": response.data.base64ImageData});
         }
       } else {
@@ -225,6 +226,7 @@ router.post(`/admin-controller/entity/identities`, authorization, async (req, re
           "Content-Type": "application/json; charset=utf-8",
         }
       })
+      console.log(response.data);
       res.status(response.status).json(response.data); // proxy results
     } catch (error) {
       console.log("[API] There was an error",  (error.response)?error.response:error);
@@ -245,31 +247,31 @@ router.get(`/login-controller`, async (req, res) => {
 
     if (token) {
 
-      const secretKeyBase64 = Buffer.from(process.env.ALMEFY_SECRETBASE64, "base64");
-      const tokenresult = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
-
-      console.log("[API] JWT Token from API", token);
-      console.log("[API] JWT Challenge response verifyed - sending OTP", tokenresult);
-
-      const sendUrl = `${tokenresult.iss}/v1/entity/identities/${encodeURIComponent(tokenresult.sub)}/authenticate`;
-      const processAuthentificationData = JSON.stringify({ "challenge": tokenresult.jti, "otp": tokenresult.otp });
-      const mytime = Math.floor(new Date().getTime() / 1000);
-      const bearerPayload = {
-        iss: process.env.ALMEFY_KEY,
-        aud: process.env.ALMEFY_APIHOST,
-        iat: mytime,
-        nbf: mytime,
-        exp: mytime+10,
-        method: "POST",
-        url: sendUrl,
-        bodyHash: CryptoJS.SHA256(processAuthentificationData).toString()
-      };
-      const signedToken = jwt.sign(bearerPayload, secretKeyBase64);
-
-      console.log("signedToken", signedToken);
-      console.log("processAuthentificationData", processAuthentificationData);
-
       try {
+
+        const secretKeyBase64 = Buffer.from(process.env.ALMEFY_SECRETBASE64, "base64");
+        const tokenresult = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
+
+        console.log("[API] JWT Token from API", token);
+        console.log("[API] JWT Challenge response verifyed - sending OTP", tokenresult);
+
+        const sendUrl = `${tokenresult.iss}/v1/entity/identities/${encodeURIComponent(tokenresult.sub)}/authenticate`;
+        const processAuthentificationData = JSON.stringify({ "challenge": tokenresult.jti, "otp": tokenresult.otp });
+        const mytime = Math.floor(new Date().getTime() / 1000);
+        const bearerPayload = {
+          iss: process.env.ALMEFY_KEY,
+          aud: process.env.ALMEFY_APIHOST,
+          iat: mytime,
+          nbf: mytime,
+          exp: mytime+10,
+          method: "POST",
+          url: sendUrl,
+          bodyHash: CryptoJS.SHA256(processAuthentificationData).toString()
+        };
+        const signedToken = jwt.sign(bearerPayload, secretKeyBase64);
+
+        // console.log("signedToken", signedToken);
+        // console.log("processAuthentificationData", processAuthentificationData);
 
         const result = await axios.post(sendUrl, processAuthentificationData, {
           headers: {
@@ -280,15 +282,15 @@ router.get(`/login-controller`, async (req, res) => {
 
         if (result.status===200) {
 
-          const secretKeyBase64 = Buffer.from(process.env.ACCESS_SECRETBASE64, "base64");
+          console.log(result.data)
 
-          const admin = JSON.parse(fs.readFileSync('./api/admin.json', 'utf8'));
-          console.log(admin)
+          const secretKeyBase64 = Buffer.from(process.env.ACCESS_SECRETBASE64, "base64");
+          // const admin = JSON.parse(fs.readFileSync('./api/admin.json', 'utf8'));
           const accessPayload = {
             sub: tokenresult.sub,
-            role: (admin.find(t => t.identity.toLowerCase() === tokenresult.sub.toLowerCase())? "ADMIN" : "USER")
+            role: tokenresult.role,
+            session: result.data.session
           };
-
           const signOptions = {
             expiresIn: '86400000',
             algorithm: 'HS256',
@@ -296,16 +298,17 @@ router.get(`/login-controller`, async (req, res) => {
 
           const accessToken = jwt.sign(accessPayload, secretKeyBase64, signOptions);
           console.log("[API] challenge successfully completed", accessToken);
-          console.log(process.env.ACCESS_TOKEN);
+          // console.log(process.env.ACCESS_TOKEN);
 
           res.cookie(process.env.ACCESS_TOKEN, accessToken, {
             httpOnly: true,
             sameSite: "strict",
             secure: process.env.NODE_ENV === "production",
           });
+          res.redirect('/');
 
-          res.json({status: 200, "message" : "otp works - created access token and set as jwt cookie"});
-          console.log("accessPayload", accessPayload);
+          // res.json({status: 200, "message" : "otp works - created access token and set as jwt cookie"});
+          // console.log("accessPayload", accessPayload);
 
         } else {
 
@@ -329,9 +332,43 @@ router.get(`/login-controller`, async (req, res) => {
 
 });
 
-router.get(`/login-controller/logout`, (req, res) => {
+router.get(`/login-controller/logout`, authorization, async (req, res) => {
+
+  const secretKeyBase64 = Buffer.from(process.env.ALMEFY_SECRETBASE64, "base64");
+  const sendUrl = `${process.env.ALMEFY_APIHOST}/v1/entity/sessions/${req.session.id}`;
+  const processAuthentificationData = null;
+  const mytime = Math.floor(new Date().getTime() / 1000);
+  const bearerPayload = {
+    "iss": process.env.ALMEFY_KEY,
+    "aud": process.env.ALMEFY_APIHOST,
+    "iat": mytime,
+    "nbf": mytime,
+    "exp": mytime+10,
+    "method": "DELETE",
+    "url": sendUrl,
+    "bodyHash": CryptoJS.SHA256(processAuthentificationData).toString()
+  };
+
+  const options = {
+    baseURL: process.env.ALMEFY_APIHOST,
+    method: 'DELETE',
+    url: sendUrl,
+    data: processAuthentificationData,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+    }
+  }
+
+  const signedToken = jwt.sign(bearerPayload, secretKeyBase64);
+  console.log(sendUrl, options, signedToken);
+  options.headers.Authorization = `Bearer ${signedToken}`;
+
+  const response = await axios.request(options);
+  console.log(response)
+
   res.clearCookie(process.env.ACCESS_TOKEN);
   res.end();
+
 });
 
 module.exports = {

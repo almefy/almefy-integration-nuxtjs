@@ -23,7 +23,7 @@ export const mutations = {
 
 export const actions = {
   nuxtServerInit(vuexContext, context) {
-    console.log('nuxtServerInit called');
+    // console.log('nuxtServerInit called');
   },
   initAuth(vuexContext, context) {
 
@@ -32,7 +32,7 @@ export const actions = {
     if (context.req) {
 
       if (!context.req.headers.cookie) {
-        return;
+        return; // do not process here
       }
 
       const jwtCookie = context.req.headers.cookie
@@ -49,15 +49,12 @@ export const actions = {
       try {
 
         const payload = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
-        console.log("setToken", token, payload);
+        // console.log("setToken", token, payload);
         vuexContext.commit("setToken", {token, payload});
-
       } catch (Error) {
-
         // console.log('for some reason we hit a catch block', Error);
         vuexContext.commit("clearToken");
         this.$axios.get(`${this.$config.authControllerUrl}/logout`);
-
       }
 
     }
@@ -65,8 +62,8 @@ export const actions = {
   },
   logout(vuexContext, context) {
 
-    vuexContext.commit("clearToken");
     this.$axios.get(`${this.$config.authControllerUrl}/logout`);
+    vuexContext.commit("clearToken");
 
   }
 }

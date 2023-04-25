@@ -1,4 +1,5 @@
 <template>
+
 <v-container grid-list-xl fluid>
   <v-card>
     <v-card-title>
@@ -63,7 +64,6 @@
       </v-col>
     </v-row>
   </v-card>
-
 </v-container>
 </template>
 
@@ -108,6 +108,7 @@ export default {
       },
       rowsPerPage: 5,
       mode: "edit",
+      dialog: false,
     }
   },
   watch: {
@@ -131,7 +132,7 @@ export default {
     async getDataFromApi () {
       this.loading = true;
       const result = await this.$axios.post(`/api/admin-controller/entity/identities`);
-
+      console.log(result);
       if (result.data) {
         this.identities = result.data;
         this.totalIdentities = this.identities.total_count;
@@ -161,7 +162,7 @@ export default {
       });
     },
     editIdentity(item) {
-      this.$dialog.show(tokenForm, {identifier: item.identifier, parent: this}, {"max-width":"600px"})
+      this.$dialog.show(tokenForm, {identifier: item.identifier, parent: this}, { width: "600"})
     },
     async deleteIdentity(item) {
       await this.$dialog.confirm({
