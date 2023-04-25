@@ -55,17 +55,30 @@ const validation = [
 
 const authorization = (req, res, next) => {
 
-  const secretKeyBase64 = Buffer.from(process.env.ACCESS_SECRETBASE64, "base64");
-  const jwtCookie = req.headers.cookie
-  .split(";")
-  .find(c => c.trim().startsWith(process.env.ACCESS_TOKEN));
-  const token = jwtCookie.split("=")[1];
-  const tokenresult = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
+  try {
 
-  req.userId = tokenresult.iss;
-  req.userRole = tokenresult.role;
-  req.session = tokenresult.session;
-  return next();
+    const secretKeyBase64 = Buffer.from(process.env.ACCESS_SECRETBASE64, "base64");
+    const jwtCookie = req.headers.cookie
+    .split(";")
+    .find(c => c.trim().startsWith(process.env.ACCESS_TOKEN));
+    const token = jwtCookie.split("=")[1];
+    const tokenresult = jwt.verify(token, secretKeyBase64, {clockTolerance: 60});
+
+    // FIXME - next round ... static bucket arraylist with sessions where the update is stored
+    // const currentDatetime = new Date();
+    // const sessionExpire = new Date(tokenresult.session.expiresAt);
+
+    // console.log(currentDatetime, sessionExpire, sessionExpire - currentDatetime, sessionExpire > currentDatetime)
+
+    req.userId = tokenresult.iss;
+    req.userRole = tokenresult.role;
+    req.session = tokenresult.session;
+
+    return next();
+  } catch (error) {
+    console.log(error);
+    res.redirect('/?no-token-found');
+  }
 
 };
 
@@ -227,7 +240,7 @@ router.post(`/admin-controller/entity/identities`, authorization, async (req, re
           "Content-Type": "application/json; charset=utf-8",
         }
       })
-      console.log(response.data);
+      // console.log(response.data);
       res.status(response.status).json(response.data); // proxy results
     } catch (error) {
       console.log("[API] There was an error",  (error.response)?error.response:error);
@@ -245,7 +258,7 @@ router.get(`/login-controller`, async (req, res) => {
   try {
 
     const token = req.get(process.env.CONTROLLER_AUTH_TOKEN);
-    console.log("token", token);
+    // console.log("token", token);
 
     if (token) {
 

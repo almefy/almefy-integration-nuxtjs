@@ -132,7 +132,7 @@ export default {
     async getDataFromApi () {
       this.loading = true;
       const result = await this.$axios.post(`/api/admin-controller/entity/identities`);
-      console.log(result);
+      // console.log(result);
       if (result.data) {
         this.identities = result.data;
         this.totalIdentities = this.identities.total_count;
